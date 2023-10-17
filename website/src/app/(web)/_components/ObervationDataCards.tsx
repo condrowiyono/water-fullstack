@@ -16,7 +16,7 @@ const ObservationDataCards = async ({ type, unit, ...props }: ObservationDataCar
   return (
     <div {...props}>
       <Suspense fallback={<div className="w-full h-[400px] flex items-center justify-center">Loading...</div>}>
-        {data.data.map((item) => (
+        {data?.data?.map((item) => (
           <Link
             key={item.id}
             className="stats shadow no-underline hover:scale-105 transition-scale duration-200"
