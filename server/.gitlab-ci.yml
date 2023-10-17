@@ -1,0 +1,34 @@
+stages:
+  - publish
+  - deploy
+
+variables:
+  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+
+publish:
+  image: docker:latest
+  stage: publish
+  services:
+    - docker:dind
+  script:
+    - cp $DOT_ENV_WATER_API .env
+    - docker build -t $TAG_LATEST .
+    - docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker push $TAG_LATEST
+  only:
+    - main
+deploy:
+  image: alpine:latest
+  stage: deploy
+  script:
+    - chmod 400 $DOCKER_ID_RSA
+    - apk update && apk add openssh-client
+    - |
+      ssh -o StrictHostKeyChecking=no -i $DOCKER_ID_RSA $DOCKER_SERVER_USER@$DOCKER_SERVER_IP "
+        docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY;
+        docker pull $TAG_LATEST;
+        docker service update --image $TAG_LATEST --with-registry-auth water_api;
+        exit;
+      "
+  only:
+    - main
