@@ -3,8 +3,11 @@ import fetcher from "@/utils/fetcher";
 import { formatDateTime } from "@/utils/dayjs";
 
 const WaterlevelDetailPage = async ({ params }: { params: { id: string } }) => {
-  const river = await fetcher<River>({ url: `rivers/${params.id}` });
-  const today = await fetcher<WaterLevelData[]>({ url: `/waterlevels/today/${params.id}` });
+  const river = await fetcher<River>({ baseURL: process.env.API_URL, url: `/rivers/${params.id}` });
+  const today = await fetcher<WaterLevelData[]>({
+    baseURL: process.env.API_URL,
+    url: `/waterlevels/today/${params.id}`,
+  });
 
   return (
     <div>
